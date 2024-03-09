@@ -1,6 +1,7 @@
 import os
 import random
 import pygame
+import time
 
 
 class Puzzle:
@@ -70,6 +71,9 @@ class Puzzle:
                 piece_rect = pygame.Rect(self.pos[0] + i * cell_width, self.pos[1] + j * cell_height, cell_width,
                                          cell_height)
                 if piece_rect.collidepoint(mouse_pos):
+                    pygame.mixer.music.load('../assets/Sounds/PartSelection.mp3')
+                    pygame.mixer.music.set_volume(0.5)
+                    pygame.mixer.music.play()
                     return i, j
         return None
 
@@ -97,14 +101,13 @@ class Puzzle:
         return True
 
     def win(self):
-        self.screen.blit(self.main_background, (0, 0))
-
-        font = pygame.font.SysFont(None, 200)
+        font = pygame.font.SysFont(None, 60)
         text = font.render('Win!', True, (0, 255, 0))
         text_shadow = font.render('Win!', True, (0, 0, 0))
-        text_rect = text.get_rect(center=(self.screen.get_width() // 2,
-                                          self.screen.get_height() // 2))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, 50))
         shadow_rect = text_shadow.get_rect(center=(text_rect.centerx + 3, text_rect.centery + 3))
+
+        # Отображение "Win!" над фоном, без стирания фона
         self.screen.blit(text_shadow, shadow_rect)
         self.screen.blit(text, text_rect)
 
@@ -115,5 +118,7 @@ class Puzzle:
 
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
+
+        time.sleep(2)
 
         self.end = True

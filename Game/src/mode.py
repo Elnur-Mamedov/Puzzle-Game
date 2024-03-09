@@ -12,9 +12,9 @@ class Mode:
         self.menu = menu
 
     def draw(self):
-        easy_mode = Button((290, 150), 230, 50, 'Easy', '#063B14', '#05310E', '#FFFFFF', self.font)
-        midle_mode = Button((290, 250), 230, 50, 'Midle', '#52570A', '#444703', '#FFFFFF', self.font)
-        hard_mode = Button((290, 350), 230, 50, 'Hard', '#3D0606', '#350505', '#FFFFFF', self.font)
+        easy_mode = Button((290, 150), 230, 50, 'Easy', '#063B14', '#05310E', '#FFFFFF', self.font, '../assets/Sounds/Buttonclick.wav')
+        midle_mode = Button((290, 250), 230, 50, 'Midle', '#52570A', '#444703', '#FFFFFF', self.font, '../assets/Sounds/Buttonclick.wav')
+        hard_mode = Button((290, 350), 230, 50, 'Hard', '#3D0606', '#350505', '#FFFFFF', self.font, '../assets/Sounds/Buttonclick.wav')
         back = Button((290, 450), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
 
         while True:

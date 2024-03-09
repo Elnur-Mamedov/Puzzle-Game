@@ -2,12 +2,13 @@ import pygame
 
 
 class Button:
-    def __init__(self, pos, width, height, text, color, bottom_color, text_color, font):
+    def __init__(self, pos, width, height, text, color, bottom_color, text_color, font, click_sound_path=None):
         # Core attributes
         self.elevation = 6
         self.dynamic_elevation = 6
         self.original_y_pos = pos[1]
         self.pressed = False
+        self.click_sound_path = click_sound_path
 
         # Top rectangle
         self.top_rect = pygame.Rect(pos, (width, height))
@@ -38,8 +39,9 @@ class Button:
             if event.button == 1 and self.top_rect.collidepoint(event.pos):
                 self.pressed = True
                 self.dynamic_elevation = 0
-                pygame.mixer.music.load('../assets/Sounds/Buttonclick.wav')
-                pygame.mixer.music.play()
+                if self.click_sound_path is not None:
+                    pygame.mixer.music.load(self.click_sound_path)
+                    pygame.mixer.music.play()
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and self.pressed:
                 self.pressed = False
