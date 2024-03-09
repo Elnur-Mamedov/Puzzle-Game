@@ -38,6 +38,8 @@ class Button:
             if event.button == 1 and self.top_rect.collidepoint(event.pos):
                 self.pressed = True
                 self.dynamic_elevation = 0
+                pygame.mixer.music.load('../assets/Sounds/Buttonclick.wav')
+                pygame.mixer.music.play()
         elif event.type == pygame.MOUSEBUTTONUP:
             if event.button == 1 and self.pressed:
                 self.pressed = False

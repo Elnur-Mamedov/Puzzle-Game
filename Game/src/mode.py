@@ -1,7 +1,7 @@
 import pygame
 
 from src.button import Button
-from src.SinglePlayer import SinglePlayer
+from src.single_player import SinglePlayer
 
 
 class Mode:
@@ -24,13 +24,13 @@ class Mode:
 
             for event in pygame.event.get():
                 easy_mode.click(event, lambda:(
-                    SinglePlayer(self.screen, self.font, self.main_background, self.menu,  "../assets/image.jpg", (450, 450), (180, 80), puzzle_size=(3, 3)).draw()
+                    SinglePlayer(self.screen, self.font, self.main_background, self.menu, (3, 3)).draw()
                 ))
                 midle_mode.click(event, lambda: (
-                    SinglePlayer(self.screen, self.font, self.main_background, self.menu, "../assets/image.jpg",(450, 450), (180, 80), puzzle_size=(4, 4)).draw()
+                    SinglePlayer(self.screen, self.font, self.main_background, self.menu, (4, 4)).draw()
                 ))
                 hard_mode.click(event, lambda: (
-                    SinglePlayer(self.screen, self.font, self.main_background, self.menu, "../assets/image.jpg",(450, 450), (180, 80), puzzle_size=(5, 5)).draw()
+                    SinglePlayer(self.screen, self.font, self.main_background, self.menu, (5, 5)).draw()
                 ))
 
                 back.click(event, lambda: (
