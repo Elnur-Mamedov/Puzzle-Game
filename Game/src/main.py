@@ -1,10 +1,10 @@
 import pygame
 
-from src.menu import Menu
+from src.Views.menu import Menu
 
 pygame.init()
 
-screen = pygame.display.set_mode((800, 600), flags=pygame.NOFRAME)
+screen = pygame.display.set_mode((800, 600))
 
 pygame.display.set_caption("Puzzle Game")
 pygame.display.set_icon(pygame.image.load('../assets/gameicon.png'))

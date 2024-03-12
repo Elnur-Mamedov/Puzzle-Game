@@ -2,19 +2,22 @@ import os
 import random
 import pygame
 import time
+import json
+import base64
 
 
 class Puzzle:
     def __init__(self, screen, puzzle_size, main_background):
-        self.screen = screen
-        self.puzzle_size = puzzle_size
-        self.main_background = main_background
-        self.pos = (180, 80)
-        self.image = self.load_and_scale_image('../assets/Images')
-        self.puzzle_size = puzzle_size
-        self.puzzle = self.create_puzzle()
-        self.selected_piece = None
-        self.end = False
+            self.screen = screen
+            self.puzzle_size = puzzle_size
+            self.main_background = main_background
+            self.pos = (180, 80)
+            self.image = self.load_and_scale_image('../assets/Images')
+            self.puzzle_size = puzzle_size
+            self.puzzle = self.create_puzzle()
+            self.selected_piece = None
+            self.end = False
+
 
     def load_and_scale_image(self, folder_path):
         files = os.listdir(folder_path)
@@ -83,6 +86,7 @@ class Puzzle:
         self.puzzle[index1], self.puzzle[index2] = self.puzzle[index2], self.puzzle[index1]
 
         if self.is_puzzle_solved():
+            self.render_image_parts()
             self.win()
 
     def is_puzzle_solved(self):
@@ -122,3 +126,25 @@ class Puzzle:
         time.sleep(2)
 
         self.end = True
+
+    @classmethod
+    def to_json(self, images):
+        puzzle_data = []
+        for image in images:
+            image_bytes = pygame.image.tostring(image, 'RGBA')
+            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
+            width, height = image.get_size()
+            puzzle_data.append({"image_base64": image_base64, "width": width, "height": height})
+        return puzzle_data
+
+    @classmethod
+    def from_json(self, json_data):
+        puzzle_data = json.loads(json_data)
+
+        images = []
+        for data in puzzle_data:
+            image_bytes = base64.b64decode(data["image_base64"])
+            image_surface = pygame.image.fromstring(image_bytes, (data["width"], data["height"]), 'RGBA')
+            images.append(image_surface)
+        return images
+
