@@ -1,6 +1,4 @@
 import socket
-import time
-import json
 
 
 class Server:
@@ -10,32 +8,46 @@ class Server:
 
         hostname = socket.gethostname()
         ip_address = socket.gethostbyname(hostname)
-        with open('ipadress.json', 'w') as f:
-            print(ip_address)
-            json.dump(ip_address, f)
-
-        self.main_socket.setblocking(0)
 
         self.main_socket.bind((ip_address, 10000))
         self.main_socket.listen(2)
 
+        self.start = False
         self.players = []
         self.draw()
 
     def draw(self):
+        data = None
+        check = True
         while True:
-            try:
-                new_soccket, addr = self.main_socket.accept()
-                self.players.append(new_soccket)
-                print('Connected by', addr)
+            # Gathering the players
+            if not self.start:
+                try:
+                    new_soccket, addr = self.main_socket.accept()
+                    self.players.append(new_soccket)
+                    print('Connected by', addr)
 
-                data = new_soccket.recv(1024)
+                    if len(self.players) == 1:
+                        self.players[0].send("Send".encode())
+                        data = self.players[0].recv(1080249).decode()
+                    elif len(self.players) == 2:
+                        self.players[1].send(data.encode())
+                        self.start = True
+                except:
+                    pass
+            else:
+                if check:
+                    # Меллим этот код чисто для теста
+                    # Я тут сперва передаю True, это означает что ход у первого пользователя
+                    # Потом когда первый сделал свой ход, я отправляю ему же False
+                    # И его ход должен заблокироваться, то есть он не сможет выбрать, но че-то не получается
 
-                message = data.decode()
-                print("Получено от клиента:", message)
-            except:
-                pass
+                    self.players[0].send("True".encode())
 
-            time.sleep(1)
+                    data = self.players[0].recv(1080249).decode()
+                    self.players[1].send(data.encode())
+
+                    self.players[0].send("False".encode())
+                    check = False
 
 server = Server()

@@ -2,7 +2,7 @@ import os
 import random
 import pygame
 import time
-import json
+import sys
 import base64
 
 
@@ -14,7 +14,7 @@ class Puzzle:
             self.pos = (180, 80)
             self.image = self.load_and_scale_image('../assets/Images')
             self.puzzle_size = puzzle_size
-            self.puzzle = self.create_puzzle()
+            self.puzzle = None
             self.selected_piece = None
             self.end = False
 
@@ -128,23 +128,23 @@ class Puzzle:
         self.end = True
 
     @classmethod
-    def to_json(self, images):
-        puzzle_data = []
+    def to_string(cls, images):
+        puzzle_data = ""
         for image in images:
             image_bytes = pygame.image.tostring(image, 'RGBA')
             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
             width, height = image.get_size()
-            puzzle_data.append({"image_base64": image_base64, "width": width, "height": height})
+            puzzle_data += f"{image_base64}|{width}|{height}||"
         return puzzle_data
 
     @classmethod
-    def from_json(self, json_data):
-        puzzle_data = json.loads(json_data)
+    def from_string(cls, puzzle_string):
+        puzzle_data = puzzle_string.split("||")[:-1]
 
         images = []
         for data in puzzle_data:
-            image_bytes = base64.b64decode(data["image_base64"])
-            image_surface = pygame.image.fromstring(image_bytes, (data["width"], data["height"]), 'RGBA')
+            image_base64, width, height = data.split("|")
+            image_bytes = base64.b64decode(image_base64)
+            image_surface = pygame.image.fromstring(image_bytes, (int(width), int(height)), 'RGBA')
             images.append(image_surface)
         return images
-

@@ -15,6 +15,7 @@ class SinglePlayer:
     def draw(self):
         back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
         puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
+        puzzle.puzzle = puzzle.create_puzzle()
 
         while not puzzle.end:
             pygame.display.update()
