@@ -34,6 +34,9 @@ class SinglePlayer:
                         else:
                             puzzle.swap_pieces(puzzle.selected_piece, clicked_piece)
                             puzzle.selected_piece = None
+
+                            if puzzle.end:
+                                puzzle.win()
                 back.click(event, lambda: (
                     self.menu.draw()
                 ))

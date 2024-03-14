@@ -32,6 +32,7 @@ class Server:
                         data = self.players[0].recv(1080249).decode()
                     elif len(self.players) == 2:
                         self.players[1].send(data.encode())
+                        self.players[0].send("Start".encode())
                         self.start = True
                 except:
                     pass

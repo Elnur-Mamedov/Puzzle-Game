@@ -18,7 +18,6 @@ class Puzzle:
             self.selected_piece = None
             self.end = False
 
-
     def load_and_scale_image(self, folder_path):
         files = os.listdir(folder_path)
         random_image = random.choice(files)
@@ -93,7 +92,7 @@ class Puzzle:
                     self.win()
                 else:
                     self.lost()
-                self.end = True
+            self.end = True
 
     def is_puzzle_solved(self):
         cell_width = self.image.get_width() // self.puzzle_size[0]
@@ -111,6 +110,8 @@ class Puzzle:
         return True
 
     def win(self):
+        self.screen.blit(self.main_background, (0, 0))
+        self.render_image_parts()
         font = pygame.font.SysFont(None, 60)
         text = font.render('Win!', True, (0, 255, 0))
         text_shadow = font.render('Win!', True, (0, 0, 0))
@@ -132,6 +133,8 @@ class Puzzle:
         self.end = True
 
     def lost(self):
+        self.screen.blit(self.main_background, (0, 0))
+        self.render_image_parts()
         font = pygame.font.SysFont(None, 60)
         text = font.render("You've lost", True, (0, 255, 0))
         text_shadow = font.render("You've lost", True, (0, 0, 0))
@@ -149,8 +152,6 @@ class Puzzle:
 
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
-
-
 
     @classmethod
     def to_string(cls, images, image_path):

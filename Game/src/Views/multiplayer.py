@@ -27,7 +27,8 @@ class Multiplayer:
     def draw(self):
         back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
         puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
-        check = False
+        check = [False, False]
+        start = False
 
         while True:
             pygame.display.update()
@@ -38,28 +39,37 @@ class Multiplayer:
                     self.move_draw("Your move")
                 else:
                     self.move_draw("The opponent's move")
+            else:
+                self.move_draw("We are waiting for the enemy")
 
             # This block of code creates and sends image or accepts, it
             # must be executed only once, therefore there is a variable 'check'
 
-            if not check:
+            if not check[0]:
                 response = self.socket.recv(1080249).decode()
 
                 if response == "Send":
                     puzzle.puzzle = puzzle.create_puzzle()
                     data = puzzle.to_string(puzzle.puzzle, puzzle.image_path)
                     self.socket.send(data.encode())
-
-                    self.move = True
                 else:
                     puzzle.puzzle, image_path = puzzle.from_string(response)
 
                     loaded_image = pygame.image.load(image_path)
                     puzzle.image = pygame.transform.scale(loaded_image, (450, 450))
-
                     self.move = False
+                    check[1] = True
 
-                check = True
+                check[0] = True
+
+            if not check[1]:
+                try:
+                    start = self.socket.recv(1024).decode()
+                    if start == "Start":
+                        self.move = True
+                        check[1] = True
+                except:
+                    pass
 
             for event in pygame.event.get():
                 if self.move:
@@ -82,7 +92,6 @@ class Multiplayer:
                                 puzzle.selected_piece = None
                                 self.move = False
                                 pygame.display.update()
-
                 else:
                     try:
                         response = self.socket.recv(1024).decode()
@@ -96,7 +105,6 @@ class Multiplayer:
 
                         self.move = True
                         pygame.display.update()
-
                     except:
                         pass
                 back.click(event, lambda: (

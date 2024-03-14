@@ -26,6 +26,9 @@ class Menu:
             self.screen.blit(self.main_background, (0, 0))
 
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+                    sys.exit()
                 new_game.click(event, lambda: (
                     Mode(self.screen, self.font, self.main_background, self, 'Single').draw()
                 ))
