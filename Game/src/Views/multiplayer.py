@@ -33,6 +33,12 @@ class Multiplayer:
             pygame.display.update()
             self.screen.blit(self.main_background, (0, 0))
 
+            if self.move is not None:
+                if self.move:
+                    self.move_draw("Your move")
+                else:
+                    self.move_draw("The opponent's move")
+
             # This block of code creates and sends image or accepts, it
             # must be executed only once, therefore there is a variable 'check'
 
@@ -75,6 +81,8 @@ class Multiplayer:
 
                                 puzzle.selected_piece = None
                                 self.move = False
+                                pygame.display.update()
+
                 else:
                     try:
                         response = self.socket.recv(1024).decode()
@@ -87,6 +95,8 @@ class Multiplayer:
                             self.menu.draw()
 
                         self.move = True
+                        pygame.display.update()
+
                     except:
                         pass
                 back.click(event, lambda: (
