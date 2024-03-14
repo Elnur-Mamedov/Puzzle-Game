@@ -11,6 +11,7 @@ class Puzzle:
             self.puzzle_size = puzzle_size
             self.main_background = main_background
             self.pos = (180, 80)
+            self.image_path = None
             self.image = self.load_and_scale_image('../assets/Images')
             self.puzzle_size = puzzle_size
             self.puzzle = None
@@ -22,6 +23,7 @@ class Puzzle:
         files = os.listdir(folder_path)
         random_image = random.choice(files)
         random_image_path = os.path.join(folder_path, random_image)
+        self.image_path = random_image_path
 
         loaded_image = pygame.image.load(random_image_path)
         scaled_image = pygame.transform.scale(loaded_image, (450, 450))
@@ -79,14 +81,19 @@ class Puzzle:
                     return i, j
         return None
 
-    def swap_pieces(self, piece1, piece2):
+    def swap_pieces(self, piece1, piece2, gamer=None):
         index1 = piece1[0] + piece1[1] * self.puzzle_size[0]
         index2 = piece2[0] + piece2[1] * self.puzzle_size[0]
         self.puzzle[index1], self.puzzle[index2] = self.puzzle[index2], self.puzzle[index1]
 
         if self.is_puzzle_solved():
             self.render_image_parts()
-            self.win()
+            if gamer is not None:
+                if gamer:
+                    self.win()
+                else:
+                    self.lost()
+                self.end = True
 
     def is_puzzle_solved(self):
         cell_width = self.image.get_width() // self.puzzle_size[0]
@@ -122,18 +129,39 @@ class Puzzle:
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
 
-        time.sleep(2)
-
         self.end = True
 
+    def lost(self):
+        font = pygame.font.SysFont(None, 60)
+        text = font.render("You've lost", True, (0, 255, 0))
+        text_shadow = font.render("You've lost", True, (0, 0, 0))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, 50))
+        shadow_rect = text_shadow.get_rect(center=(text_rect.centerx + 3, text_rect.centery + 3))
+
+        # Отображение "Win!" над фоном, без стирания фона
+        self.screen.blit(text_shadow, shadow_rect)
+        self.screen.blit(text, text_rect)
+
+        pygame.display.update()
+
+        pygame.mixer.music.load('../assets/Sounds/gameover.mp3')
+        pygame.mixer.music.play()
+
+        while pygame.mixer.music.get_busy():
+            pygame.time.Clock().tick(10)
+
+
+
     @classmethod
-    def to_string(cls, images):
+    def to_string(cls, images, image_path):
         puzzle_data = ""
         for image in images:
             image_bytes = pygame.image.tostring(image, 'RGBA')
             image_base64 = base64.b64encode(image_bytes).decode('utf-8')
             width, height = image.get_size()
             puzzle_data += f"{image_base64}|{width}|{height}||"
+
+        puzzle_data += image_path
         return puzzle_data
 
     @classmethod
@@ -146,4 +174,7 @@ class Puzzle:
             image_bytes = base64.b64decode(image_base64)
             image_surface = pygame.image.fromstring(image_bytes, (int(width), int(height)), 'RGBA')
             images.append(image_surface)
-        return images
+
+        image_path = puzzle_string.split("||")[-1]
+
+        return images, image_path

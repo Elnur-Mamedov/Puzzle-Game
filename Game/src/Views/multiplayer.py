@@ -41,11 +41,17 @@ class Multiplayer:
 
                 if response == "Send":
                     puzzle.puzzle = puzzle.create_puzzle()
-                    data = puzzle.to_string(puzzle.puzzle)
+                    data = puzzle.to_string(puzzle.puzzle, puzzle.image_path)
                     self.socket.send(data.encode())
+
                     self.move = True
                 else:
-                    puzzle.puzzle = puzzle.from_string(response)
+                    puzzle.puzzle, image_path = puzzle.from_string(response)
+
+                    loaded_image = pygame.image.load(image_path)
+                    puzzle.image = pygame.transform.scale(loaded_image, (450, 450))
+
+                    self.move = False
 
                 check = True
 
@@ -57,10 +63,16 @@ class Multiplayer:
                         if clicked_piece:
                             if not puzzle.selected_piece:
                                 puzzle.selected_piece = clicked_piece
+                            elif clicked_piece == puzzle.selected_piece:
+                                puzzle.selected_piece = None
                             else:
-                                puzzle.swap_pieces(puzzle.selected_piece, clicked_piece)
+                                puzzle.swap_pieces(puzzle.selected_piece, clicked_piece, True)
+
                                 data = f"{puzzle.selected_piece}|{clicked_piece}"
                                 self.socket.send(data.encode())
+                                if puzzle.end:
+                                    self.menu.draw()
+
                                 puzzle.selected_piece = None
                                 self.move = False
                 else:
@@ -70,7 +82,10 @@ class Multiplayer:
                         parts = response.split("|")
                         tuples = [tuple(map(int, part.strip("()").split(", "))) for part in parts]
 
-                        puzzle.swap_pieces(tuples[0], tuples[1])
+                        puzzle.swap_pieces(tuples[0], tuples[1], False)
+                        if puzzle.end:
+                            self.menu.draw()
+
                         self.move = True
                     except:
                         pass
@@ -81,3 +96,13 @@ class Multiplayer:
             puzzle.render_image_parts()
 
             back.draw(self.screen)
+
+    def move_draw(self, message):
+        font = pygame.font.SysFont(None, 40)
+        text = font.render(message, True, (0, 255, 0))
+        text_shadow = font.render(message, True, (0, 0, 0))
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, 50))
+        shadow_rect = text_shadow.get_rect(center=(text_rect.centerx + 3, text_rect.centery + 3))
+
+        self.screen.blit(text_shadow, shadow_rect)
+        self.screen.blit(text, text_rect)
