@@ -37,17 +37,12 @@ class Server:
                     pass
             else:
                 if check:
-                    # Меллим этот код чисто для теста
-                    # Я тут сперва передаю True, это означает что ход у первого пользователя
-                    # Потом когда первый сделал свой ход, я отправляю ему же False
-                    # И его ход должен заблокироваться, то есть он не сможет выбрать, но че-то не получается
-
-                    self.players[0].send("True".encode())
-
-                    data = self.players[0].recv(1080249).decode()
-                    self.players[1].send(data.encode())
-
-                    self.players[0].send("False".encode())
+                    data = self.players[0].recv(1024).decode()
                     check = False
+                else:
+                    self.players[1].send(data.encode())
+                    data = self.players[1].recv(1024).decode()
+                    self.players[0].send(data.encode())
+                    check = True
 
 server = Server()
