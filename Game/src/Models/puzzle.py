@@ -5,7 +5,7 @@ import re
 
 
 class Puzzle:
-    def __init__(self, screen, puzzle_size, main_background):
+    def __init__(self, screen, puzzle_size, main_background, click_sound):
             self.screen = screen
             self.puzzle_size = puzzle_size
             self.main_background = main_background
@@ -17,6 +17,7 @@ class Puzzle:
             self.puzzle = None
             self.selected_piece = None
             self.end = False
+            self.click_sound = click_sound
 
     def load_and_scale_image(self, folder_path):
         files = os.listdir(folder_path)
@@ -78,9 +79,10 @@ class Puzzle:
                 piece_rect = pygame.Rect(self.pos[0] + i * cell_width, self.pos[1] + j * cell_height, cell_width,
                                          cell_height)
                 if piece_rect.collidepoint(mouse_pos):
-                    pygame.mixer.music.load('../assets/Sounds/PartSelection.mp3')
-                    pygame.mixer.music.set_volume(0.5)
-                    pygame.mixer.music.play()
+                    if self.click_sound is not None:
+                        pygame.mixer.music.load('../assets/Sounds/PartSelection.mp3')
+                        pygame.mixer.music.set_volume(0.5)
+                        pygame.mixer.music.play()
                     return i, j
         return None
 
@@ -130,8 +132,9 @@ class Puzzle:
 
         pygame.display.update()
 
-        pygame.mixer.music.load('../assets/Sounds/Win.mp3')
-        pygame.mixer.music.play()
+        if self.click_sound is not None:
+            pygame.mixer.music.load('../assets/Sounds/Win.mp3')
+            pygame.mixer.music.play()
 
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
@@ -153,8 +156,9 @@ class Puzzle:
 
         pygame.display.update()
 
-        pygame.mixer.music.load('../assets/Sounds/gameover.mp3')
-        pygame.mixer.music.play()
+        if self.click_sound is not None:
+            pygame.mixer.music.load('../assets/Sounds/gameover.mp3')
+            pygame.mixer.music.play()
 
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)

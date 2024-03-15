@@ -6,7 +6,7 @@ from src.Models.puzzle import Puzzle
 
 
 class SinglePlayer:
-    def __init__(self, screen, font, main_background, menu, puzzle_size, data):
+    def __init__(self, screen, font, main_background, menu, puzzle_size, data, click_sound):
         self.screen = screen
         self.font = font
         self.main_background = main_background
@@ -15,10 +15,11 @@ class SinglePlayer:
         self.data = data
         self.start_time = 0
         self.duration = 0
+        self.click_sound = click_sound
 
     def draw(self):
         back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
-        puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
+        puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background, self.click_sound)
         puzzle.puzzle, none = puzzle.create_puzzle()
 
         if self.data[1] == 'Easy':

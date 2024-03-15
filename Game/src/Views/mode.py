@@ -5,20 +5,21 @@ from src.Views.multiplayer import Multiplayer
 from src.Views.single_player import SinglePlayer
 
 class Mode:
-    def __init__(self, screen, font, main_background, menu, game_mode):
+    def __init__(self, screen, font, main_background, menu, game_mode, click_sound):
         self.screen = screen
         self.font = font
         self.main_background = main_background
         self.menu = menu
         self.game_mode = game_mode
+        self.click_sound = click_sound
 
     def draw(self):
         easy_mode = Button((290, 150), 230, 50, 'Easy', '#063B14', '#05310E', '#FFFFFF', self.font,
-                           '../assets/Sounds/Buttonclick.wav')
+                           self.click_sound)
         midle_mode = Button((290, 250), 230, 50, 'Midle', '#52570A', '#444703', '#FFFFFF', self.font,
-                            '../assets/Sounds/Buttonclick.wav')
+                            self.click_sound)
         hard_mode = Button((290, 350), 230, 50, 'Hard', '#3D0606', '#350505', '#FFFFFF', self.font,
-                           '../assets/Sounds/Buttonclick.wav')
+                           self.click_sound)
         back = Button((290, 450), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
 
         while True:
@@ -59,6 +60,6 @@ class Mode:
             puzzle_size = (5, 5)
 
         if(self.game_mode == 'Single'):
-            SinglePlayer(self.screen, self.font, self.main_background, self.menu, puzzle_size, (self.game_mode, mode)).draw()
+            SinglePlayer(self.screen, self.font, self.main_background, self.menu, puzzle_size, (self.game_mode, mode), self.click_sound).draw()
         elif(self.game_mode == 'Multiplayer'):
-            Multiplayer(self.screen, self.font,  self.main_background, self.menu, puzzle_size, (self.game_mode, mode)).draw()
+            Multiplayer(self.screen, self.font,  self.main_background, self.menu, puzzle_size, (self.game_mode, mode), self.click_sound).draw()

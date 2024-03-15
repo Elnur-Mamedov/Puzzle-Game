@@ -30,12 +30,13 @@ def get_ip():
     return ip
 
 class Multiplayer:
-    def __init__(self, screen, font, main_background, menu, puzzle_size, data):
+    def __init__(self, screen, font, main_background, menu, puzzle_size, data, click_sound):
         self.menu = menu
         self.screen = screen
         self.main_background = main_background
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
+        self.click_sound = click_sound
 
         ip_address = get_ip()
         try:
@@ -58,7 +59,7 @@ class Multiplayer:
     def draw(self):
         try:
             back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
-            puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
+            puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background, self.click_sound)
             check = [False, False, False, True]
 
             game_stop = pygame.time.get_ticks()
