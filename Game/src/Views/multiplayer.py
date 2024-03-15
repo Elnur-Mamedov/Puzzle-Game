@@ -152,7 +152,7 @@ class Multiplayer:
                                     puzzle.winner = "Win"
                                 else:
                                     puzzle.winner = "Lose"
-                                json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
+                                json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}||"
                                 self.save_data(json_data)
                                 self.menu.draw()
 

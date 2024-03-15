@@ -56,7 +56,7 @@ class SinglePlayer:
                                     puzzle.winner = "Win"
                                 else:
                                     puzzle.winner = "Lose"
-                                data = f"||{self.data[0]}|{self.data[1]}|{self.start_time}s|{puzzle.winner}||"
+                                data = f"{self.data[0]}|{self.data[1]}|{self.start_time}s|{puzzle.winner}||"
                                 self.save_data(data)
                                 puzzle.win()
 
