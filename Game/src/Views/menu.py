@@ -45,7 +45,7 @@ class Menu:
                 ))
 
                 records.click(event, lambda: (
-                    Records(self.screen, self.font, self.main_background, self).draw()
+                    Records("Statistics.json", self.screen, self.font, self).draw()
                 ))
 
                 settings.click(event)

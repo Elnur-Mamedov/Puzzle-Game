@@ -1,4 +1,6 @@
 import socket
+import time
+
 import pygame
 import pyodbc
 import json
@@ -29,154 +31,164 @@ def get_ip():
 
 class Multiplayer:
     def __init__(self, screen, font, main_background, menu, puzzle_size, data):
-        self.screen = screen
-        self.font = font
-        self.main_background = main_background
         self.menu = menu
-        self.puzzle_size = puzzle_size
-        self.start_time = 0
-        self.duration = 0
-        self.data = data
+        self.screen = screen
+        self.main_background = main_background
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
         ip_address = get_ip()
+        try:
+            self.socket.connect((ip_address, 10000))
+        except:
+            self.move_draw("The server is not responding or there are no seats(", 250, (158, 17, 14), True)
+            time.sleep(3)
+            self.menu.draw()
 
-        self.socket.connect((ip_address, 10000))
-
+        self.font = font
+        self.puzzle_size = puzzle_size
+        self.start_time = 0
+        self.duration = 0
+        self.data = data
         self.socket.setblocking(False)
 
         self.move = None
         self.draw()
 
     def draw(self):
-        back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
-        puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
-        check = [False, False, False, True]
+        try:
+            back = Button((290, 550), 230, 50, 'Back', '#333333', '#222222', '#FFFFFF', self.font)
+            puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
+            check = [False, False, False, True]
 
-        game_stop = pygame.time.get_ticks()
+            game_stop = pygame.time.get_ticks()
 
-        while True:
-            pygame.display.update()
-            self.screen.blit(self.main_background, (0, 0))
+            while True:
+                pygame.display.update()
+                self.screen.blit(self.main_background, (0, 0))
 
-            if self.move is not None:
-                if self.move:
-                    self.move_draw("Your move")
+                if self.move is not None:
+                    if self.move:
+                        self.move_draw("Your move")
+                    else:
+                        self.move_draw("The opponent's move")
                 else:
-                    self.move_draw("The opponent's move")
-            else:
-                self.move_draw("We are waiting for the enemy")
+                    self.move_draw("We are waiting for the enemy")
 
-            # This block of code creates and sends image or accepts, it
-            # must be executed only once, therefore there is a variable 'check'
+                # This block of code creates and sends image or accepts, it
+                # must be executed only once, therefore there is a variable 'check'
 
-            if not check[0]:
-                response = self.socket.recv(1024).decode()
+                if not check[0]:
+                    response = self.socket.recv(1024).decode()
 
-                if response == "Send":
-                    puzzle.puzzle, pieces_order = puzzle.create_puzzle()
-                    data = puzzle.pieces_order_to_string(pieces_order, puzzle.image_path)
-                    self.socket.send(data.encode())
-                else:
-                    pieces_order, image_path = puzzle.string_to_pieces_order(response)
+                    if response == "Send":
+                        puzzle.puzzle, pieces_order = puzzle.create_puzzle()
+                        data = puzzle.pieces_order_to_string(pieces_order, puzzle.image_path)
+                        self.socket.send(data.encode())
+                    else:
+                        pieces_order, image_path = puzzle.string_to_pieces_order(response)
 
-                    loaded_image = pygame.image.load(image_path)
-                    puzzle.image = pygame.transform.scale(loaded_image, (450, 450))
+                        loaded_image = pygame.image.load(image_path)
+                        puzzle.image = pygame.transform.scale(loaded_image, (450, 450))
 
-                    puzzle.puzzle = puzzle.create_puzzle_fixed(puzzle.image, self.puzzle_size, pieces_order)
-                    self.move = False
-                    check[1] = True
-
-                check[0] = True
-
-            if not check[1]:
-                try:
-                    start = self.socket.recv(1024).decode()
-                    if start == "Start":
-                        self.move = True
+                        puzzle.puzzle = puzzle.create_puzzle_fixed(puzzle.image, self.puzzle_size, pieces_order)
+                        self.move = False
                         check[1] = True
-                except:
-                    pass
 
-            for event in pygame.event.get():
-                if event.type == pygame.QUIT:
-                    pygame.quit()
-                if self.move:
-                    if event.type == pygame.MOUSEBUTTONDOWN:
-                        mouse_pos = pygame.mouse.get_pos()
-                        clicked_piece = puzzle.get_clicked_piece(mouse_pos)
-                        if clicked_piece:
-                            if not puzzle.selected_piece:
-                                puzzle.selected_piece = clicked_piece
-                            elif clicked_piece == puzzle.selected_piece:
-                                puzzle.selected_piece = None
-                            else:
-                                puzzle.swap_pieces(puzzle.selected_piece, clicked_piece, True)
-                                data = f"{puzzle.selected_piece}|{clicked_piece}"
+                    check[0] = True
 
-                                self.socket.send(data.encode())
-                                check[2] = True
-                                if puzzle.end:
-                                    game_stop = (pygame.time.get_ticks() - game_stop) / 1000
-                                    if puzzle.winner:
-                                        puzzle.winner = "Win"
-                                    else:
-                                        puzzle.winner = "Lose"
-                                    json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
-                                    self.save_data(json_data)
-                                    self.menu.draw()
-
-                                puzzle.selected_piece = None
-                                self.move = False
-                                pygame.display.update()
-                else:
+                if not check[1]:
                     try:
-                        response = self.socket.recv(1024).decode()
-
-                        parts = response.split("|")
-                        tuples = [tuple(map(int, part.strip("()").split(", "))) for part in parts]
-
-                        puzzle.swap_pieces(tuples[0], tuples[1], False)
-                        if puzzle.end:
-                            game_stop = (pygame.time.get_ticks() - game_stop) / 1000
-                            if puzzle.winner:
-                                puzzle.winner = "Win"
-                            else:
-                                puzzle.winner = "Lose"
-                            json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
-                            self.save_data(json_data)
-                            self.menu.draw()
-
-                        self.move = True
-                        if check[2]:
-                            self.start_timer(21000)
-                            check[2] = False
+                        start = self.socket.recv(1024).decode()
+                        if start == "Start":
+                            self.move = True
+                            check[1] = True
                     except:
                         pass
-                back.click(event, lambda: (
-                    self.menu.draw()
-                ))
 
-            if self.move:
-                if check[3]:
-                    self.start_timer(21000)
-                    check[3] = False
-                if self.draw_timer():
-                    data = f"(1, 1)|(1, 1)"
-                    self.socket.send(data.encode())
-                    self.move = False
-                    check[2] = True
+                for event in pygame.event.get():
+                    if event.type == pygame.QUIT:
+                        pygame.quit()
+                    if self.move:
+                        if event.type == pygame.MOUSEBUTTONDOWN:
+                            mouse_pos = pygame.mouse.get_pos()
+                            clicked_piece = puzzle.get_clicked_piece(mouse_pos)
+                            if clicked_piece:
+                                if not puzzle.selected_piece:
+                                    puzzle.selected_piece = clicked_piece
+                                elif clicked_piece == puzzle.selected_piece:
+                                    puzzle.selected_piece = None
+                                else:
+                                    puzzle.swap_pieces(puzzle.selected_piece, clicked_piece, True)
+                                    data = f"{puzzle.selected_piece}|{clicked_piece}"
 
-            puzzle.render_image_parts()
+                                    self.socket.send(data.encode())
+                                    check[2] = True
+                                    if puzzle.end:
+                                        game_stop = (pygame.time.get_ticks() - game_stop) / 1000
+                                        if puzzle.winner:
+                                            puzzle.winner = "Win"
+                                        else:
+                                            puzzle.winner = "Lose"
+                                        json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
+                                        self.save_data(json_data)
+                                        self.menu.draw()
 
-            back.draw(self.screen)
+                                    puzzle.selected_piece = None
+                                    self.move = False
+                                    pygame.display.update()
+                    else:
+                        try:
+                            response = self.socket.recv(1024).decode()
 
-    def move_draw(self, message):
+                            parts = response.split("|")
+                            tuples = [tuple(map(int, part.strip("()").split(", "))) for part in parts]
+
+                            puzzle.swap_pieces(tuples[0], tuples[1], False)
+                            if puzzle.end:
+                                game_stop = (pygame.time.get_ticks() - game_stop) / 1000
+                                if puzzle.winner:
+                                    puzzle.winner = "Win"
+                                else:
+                                    puzzle.winner = "Lose"
+                                json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
+                                self.save_data(json_data)
+                                self.menu.draw()
+
+                            self.move = True
+                            if check[2]:
+                                self.start_timer(21000)
+                                check[2] = False
+                        except:
+                            pass
+                    back.click(event, lambda: (
+                        self.menu.draw()
+                    ))
+
+                if self.move:
+                    if check[3]:
+                        self.start_timer(21000)
+                        check[3] = False
+                    if self.draw_timer():
+                        data = f"(1, 1)|(1, 1)"
+                        self.socket.send(data.encode())
+                        self.move = False
+                        check[2] = True
+
+                puzzle.render_image_parts()
+
+                back.draw(self.screen)
+        except:
+            self.menu.draw()
+
+
+    def move_draw(self, message, pos=50, color=(0, 255, 0,), white=False):
+        if white:
+            self.screen.fill("#FFFFFF")
         font = pygame.font.SysFont(None, 40)
-        text = font.render(message, True, (0, 255, 0))
-        text_shadow = font.render(message, True, (0, 0, 0))
-        text_rect = text.get_rect(center=(self.screen.get_width() // 2, 50))
+        text = font.render(message, True, color)
+        text_shadow = font.render(message, True, "#FFFFFF")
+        text_rect = text.get_rect(center=(self.screen.get_width() // 2, pos))
         shadow_rect = text_shadow.get_rect(center=(text_rect.centerx + 3, text_rect.centery + 3))
 
         self.screen.blit(text_shadow, shadow_rect)

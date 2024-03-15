@@ -21,7 +21,13 @@ class SinglePlayer:
         puzzle = Puzzle(self.screen, self.puzzle_size, self.main_background)
         puzzle.puzzle, none = puzzle.create_puzzle()
 
-        self.start_timer(60000)
+        if self.data[1] == 'Easy':
+            self.start_timer(60000)
+        elif self.data[1] == 'Middle':
+            self.start_timer(120000)
+        else:
+            self.start_timer(180000)
+
 
         while not puzzle.end:
             pygame.display.update()
