@@ -1,7 +1,6 @@
 import socket
 import pygame
 import pyodbc
-import os
 import json
 
 from src.Models.button import Button
@@ -114,13 +113,18 @@ class Multiplayer:
                                 puzzle.selected_piece = None
                             else:
                                 puzzle.swap_pieces(puzzle.selected_piece, clicked_piece, True)
+                                data = f"{puzzle.selected_piece}|{clicked_piece}"
 
                                 self.socket.send(data.encode())
                                 check[2] = True
                                 if puzzle.end:
                                     game_stop = (pygame.time.get_ticks() - game_stop) / 1000
-                                    data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
-                                    self.save_data(data)
+                                    if puzzle.winner:
+                                        puzzle.winner = "Win"
+                                    else:
+                                        puzzle.winner = "Lose"
+                                    json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
+                                    self.save_data(json_data)
                                     self.menu.draw()
 
                                 puzzle.selected_piece = None
@@ -136,8 +140,12 @@ class Multiplayer:
                         puzzle.swap_pieces(tuples[0], tuples[1], False)
                         if puzzle.end:
                             game_stop = (pygame.time.get_ticks() - game_stop) / 1000
-                            data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
-                            self.save_data(data)
+                            if puzzle.winner:
+                                puzzle.winner = "Win"
+                            else:
+                                puzzle.winner = "Lose"
+                            json_data = f"{self.data[0]}|{self.data[1]}|{game_stop}s|{puzzle.winner}"
+                            self.save_data(json_data)
                             self.menu.draw()
 
                         self.move = True
@@ -192,14 +200,8 @@ class Multiplayer:
             return True
 
     def save_data(self, new_data):
-        if os.path.exists("Statistics.json"):
-            # Если файл существует, открываем его для чтения
-            with open("Statistics.json", 'r') as file:
-                data = json.load(file)
-        else:
-            with open("Statistics.json", 'w') as file:
-                json.dump("Your statistics", file)
-                return
+        with open("Statistics.json", 'r') as file:
+            data = json.load(file)
 
         data += new_data
 

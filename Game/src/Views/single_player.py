@@ -1,5 +1,4 @@
 import pygame
-import os
 import json
 
 from src.Models.button import Button
@@ -41,12 +40,16 @@ class SinglePlayer:
                         if not puzzle.selected_piece:
                             puzzle.selected_piece = clicked_piece
                         else:
-                            puzzle.swap_pieces(puzzle.selected_piece, clicked_piece)
+                            puzzle.swap_pieces(puzzle.selected_piece, clicked_piece, True)
                             puzzle.selected_piece = None
 
                             if puzzle.end:
                                 self.start_time = (pygame.time.get_ticks() - self.start_time) / 1000
-                                data = f"{self.data[0]}|{self.data[1]}|{self.start_time}s|{puzzle.winner}"
+                                if puzzle.winner:
+                                    puzzle.winner = "Win"
+                                else:
+                                    puzzle.winner = "Lose"
+                                data = f"||{self.data[0]}|{self.data[1]}|{self.start_time}s|{puzzle.winner}||"
                                 self.save_data(data)
                                 puzzle.win()
 
@@ -75,16 +78,10 @@ class SinglePlayer:
             return True
 
     def save_data(self, new_data):
-        if os.path.exists("Statistics.json"):
-            # Если файл существует, открываем его для чтения
             with open("Statistics.json", 'r') as file:
                 data = json.load(file)
-        else:
+
+            data += new_data
+
             with open("Statistics.json", 'w') as file:
-                json.dump("Your statistics", file)
-                return
-
-        data += new_data
-
-        with open("Statistics.json", 'w') as file:
-            json.dump(data, file)
+                json.dump(data, file)

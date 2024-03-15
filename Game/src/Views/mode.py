@@ -31,13 +31,13 @@ class Mode:
                     pygame.quit()
 
                 easy_mode.click(event, lambda:(
-                    self.select_mode('easy')
+                    self.select_mode('Easy')
                 ))
                 midle_mode.click(event, lambda: (
-                    self.select_mode('middle')
+                    self.select_mode('Middle')
                 ))
                 hard_mode.click(event, lambda: (
-                    self.select_mode('hard')
+                    self.select_mode('Hard')
                 ))
 
                 back.click(event, lambda: (
@@ -51,9 +51,9 @@ class Mode:
 
     def select_mode(self, mode):
         puzzle_size = None
-        if mode == 'easy':
+        if mode == 'Easy':
             puzzle_size = (3, 3)
-        elif mode == 'middle':
+        elif mode == 'Middle':
             puzzle_size = (4, 4)
         else:
             puzzle_size = (5, 5)
