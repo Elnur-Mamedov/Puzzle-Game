@@ -1,9 +1,30 @@
 import socket
 import pygame
+import pyodbc
 
 from src.Models.button import Button
 from src.Models.puzzle import Puzzle
 
+
+def get_ip():
+    conn_str = f'DRIVER={{SQL Server}};SERVER=sql.bsite.net\MSSQL2016;DATABASE=user001_Puzzle_Game;UID=user001_Puzzle_Game;PWD=Admin2004'
+
+    conn = pyodbc.connect(conn_str)
+
+    cursor = conn.cursor()
+
+    # SQL-запрос для получения IP-адреса
+    sql_query = '''
+    SELECT Ip_Adress
+    FROM IP
+    WHERE id = 1
+    '''
+
+    # Выполнение SQL-запроса
+    cursor.execute(sql_query)
+
+    # Получение результата запроса
+    return cursor.fetchone()[0]
 
 class Multiplayer:
     def __init__(self, screen, font, main_background, menu, puzzle_size=(4, 4)):
@@ -15,8 +36,8 @@ class Multiplayer:
         self.socket = socket.socket(socket.AF_INET, socket.SOCK_STREAM)
         self.socket.setsockopt(socket.IPPROTO_TCP, socket.TCP_NODELAY, 1)
 
-        hostname = socket.gethostname()
-        ip_address = socket.gethostbyname(hostname)
+        ip_address = get_ip()
+
         self.socket.connect((ip_address, 10000))
 
         self.socket.setblocking(False)
