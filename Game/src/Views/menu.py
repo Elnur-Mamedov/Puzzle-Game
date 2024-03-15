@@ -16,10 +16,8 @@ class Menu:
 
     def draw(self, sound=None):
         if sound is not None:
-            if sound:
-                self.sound = sound
-            else:
-                self.sound = sound
+            self.sound = sound
+
 
         if self.sound:
             click_sound = '../assets/Sounds/Buttonclick.wav'
