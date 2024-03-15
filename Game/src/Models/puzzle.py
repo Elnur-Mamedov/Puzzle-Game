@@ -1,8 +1,7 @@
 import os
 import random
 import pygame
-import time
-import base64
+import re
 
 
 class Puzzle:
@@ -14,6 +13,7 @@ class Puzzle:
             self.image_path = None
             self.image = self.load_and_scale_image('../assets/Images')
             self.puzzle_size = puzzle_size
+            self.winner = False
             self.puzzle = None
             self.selected_piece = None
             self.end = False
@@ -32,11 +32,15 @@ class Puzzle:
         puzzle = []
         cell_width = self.image.get_width() // self.puzzle_size[0]
         cell_height = self.image.get_height() // self.puzzle_size[1]
-        pieces = [(i, j) for i in range(self.puzzle_size[0]) for j in range(self.puzzle_size[1])]
-        random.shuffle(pieces)
-        for i, j in pieces:
-            puzzle.append(self.image.subsurface(i * cell_width, j * cell_height, cell_width, cell_height))
-        return puzzle
+        pieces_order = [(i, j) for i in range(self.puzzle_size[0]) for j in range(self.puzzle_size[1])]
+        random.shuffle(pieces_order)
+        for i, j in pieces_order:
+            piece_x = i * cell_width
+            piece_y = j * cell_height
+            piece_width = cell_width
+            piece_height = cell_height
+            puzzle.append(self.image.subsurface(piece_x, piece_y, piece_width, piece_height))
+        return puzzle, pieces_order
 
     def render_image_parts(self):
         cell_width = self.image.get_width() // self.puzzle_size[0]
@@ -89,8 +93,10 @@ class Puzzle:
             self.render_image_parts()
             if gamer is not None:
                 if gamer:
+                    self.winner = True
                     self.win()
                 else:
+                    self.winner = False
                     self.lost()
             self.end = True
 
@@ -153,29 +159,28 @@ class Puzzle:
         while pygame.mixer.music.get_busy():
             pygame.time.Clock().tick(10)
 
-    @classmethod
-    def to_string(cls, images, image_path):
-        puzzle_data = ""
-        for image in images:
-            image_bytes = pygame.image.tostring(image, 'RGBA')
-            image_base64 = base64.b64encode(image_bytes).decode('utf-8')
-            width, height = image.get_size()
-            puzzle_data += f"{image_base64}|{width}|{height}||"
+    def create_puzzle_fixed(self, image, puzzle_size, pieces_order):
+        puzzle = []
+        cell_width = image.get_width() // puzzle_size[0]
+        cell_height = image.get_height() // puzzle_size[1]
+        for i, j in pieces_order:
+            piece_x = i * cell_width
+            piece_y = j * cell_height
+            piece_width = cell_width
+            piece_height = cell_height
+            puzzle.append(image.subsurface(piece_x, piece_y, piece_width, piece_height))
+        return puzzle
 
-        puzzle_data += image_path
-        return puzzle_data
+    def pieces_order_to_string(self, pieces_order, image_url):
+        order_string = ','.join([f'({x},{y})' for x, y in pieces_order])
+        return f"{order_string}|{image_url}"
 
-    @classmethod
-    def from_string(cls, puzzle_string):
-        puzzle_data = puzzle_string.split("||")[:-1]
-
-        images = []
-        for data in puzzle_data:
-            image_base64, width, height = data.split("|")
-            image_bytes = base64.b64decode(image_base64)
-            image_surface = pygame.image.fromstring(image_bytes, (int(width), int(height)), 'RGBA')
-            images.append(image_surface)
-
-        image_path = puzzle_string.split("||")[-1]
-
-        return images, image_path
+    def string_to_pieces_order(self, string):
+        match = re.match(r'\((\d+),(\d+)\)', string)
+        if match:
+            pieces_order = []
+            for match in re.findall(r'\((\d+),(\d+)\)', string):
+                x, y = map(int, match)
+                pieces_order.append((x, y))
+            image_url = string.split('|')[-1]
+            return pieces_order, image_url

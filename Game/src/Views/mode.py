@@ -27,11 +27,14 @@ class Mode:
             self.screen.blit(self.main_background, (0, 0))
 
             for event in pygame.event.get():
+                if event.type == pygame.QUIT:
+                    pygame.quit()
+
                 easy_mode.click(event, lambda:(
                     self.select_mode('easy')
                 ))
                 midle_mode.click(event, lambda: (
-                    self.select_mode('midle')
+                    self.select_mode('middle')
                 ))
                 hard_mode.click(event, lambda: (
                     self.select_mode('hard')
@@ -50,12 +53,12 @@ class Mode:
         puzzle_size = None
         if mode == 'easy':
             puzzle_size = (3, 3)
-        elif mode == 'midle':
+        elif mode == 'middle':
             puzzle_size = (4, 4)
         else:
             puzzle_size = (5, 5)
 
         if(self.game_mode == 'Single'):
-            SinglePlayer(self.screen, self.font, self.main_background, self.menu, puzzle_size).draw()
+            SinglePlayer(self.screen, self.font, self.main_background, self.menu, puzzle_size, (self.game_mode, mode)).draw()
         elif(self.game_mode == 'Multiplayer'):
-            Multiplayer(self.screen, self.font,  self.main_background, self.menu, puzzle_size).draw()
+            Multiplayer(self.screen, self.font,  self.main_background, self.menu, puzzle_size, (self.game_mode, mode)).draw()

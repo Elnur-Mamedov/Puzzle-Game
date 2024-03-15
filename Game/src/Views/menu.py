@@ -3,6 +3,7 @@ import sys
 
 from src.Models.button import Button
 from src.Views.mode import Mode
+from src.Views.records import Records
 
 
 class Menu:
@@ -12,13 +13,19 @@ class Menu:
         self.main_background = main_background
 
     def draw(self):
-        new_game = Button((290, 150), 230, 50, 'New game', '#38083B', '#2D032D', '#FFFFFF', self.font,
+        new_game = Button((290, 100), 230, 50, 'New game', '#38083B', '#2D032D', '#FFFFFF', self.font,
                           '../assets/Sounds/Buttonclick.wav')
-        multiplayer = Button((290, 250), 230, 50, 'Multiplayer', '#38083B', '#2D032D', '#FFFFFF', self.font,
+
+        multiplayer = Button((290, 200), 230, 50, 'Multiplayer', '#38083B', '#2D032D', '#FFFFFF', self.font,
                              '../assets/Sounds/Buttonclick.wav')
-        settings = Button((290, 350), 230, 50, 'Settings', '#38083B', '#2D032D', '#FFFFFF', self.font,
+
+        records = Button((290, 300), 230, 50, 'Records', '#38083B', '#2D032D', '#FFFFFF', self.font,
                           '../assets/Sounds/Buttonclick.wav')
-        exit = Button((290, 450), 230, 50, 'Exit', '#3D0606', '#350505', '#FFFFFF', self.font)
+
+        settings = Button((290, 400), 230, 50, 'Settings', '#38083B', '#2D032D', '#FFFFFF', self.font,
+                          '../assets/Sounds/Buttonclick.wav')
+
+        exit = Button((290, 530), 230, 50, 'Exit', '#3D0606', '#350505', '#FFFFFF', self.font)
 
         while True:
             pygame.display.update()
@@ -37,6 +44,10 @@ class Menu:
                     Mode(self.screen, self.font, self.main_background, self, 'Multiplayer').draw()
                 ))
 
+                records.click(event, lambda: (
+                    Records(self.screen, self.font, self.main_background, self).draw()
+                ))
+
                 settings.click(event)
 
                 exit.click(event, lambda: (
@@ -48,3 +59,4 @@ class Menu:
             multiplayer.draw(self.screen)
             settings.draw(self.screen)
             exit.draw(self.screen)
+            records.draw(self.screen)
